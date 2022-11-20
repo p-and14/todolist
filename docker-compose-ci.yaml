@@ -12,7 +12,7 @@ services:
   postgres:
     image: postgres:latest
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./pg_data:/var/lib/postgresql/data
 #    env_file:
 #      - .env
     environment:
@@ -45,7 +45,7 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes:
-      - ./.env_ci:/todolist/.env
+      - .:/todolist/
     ports:
       - "8000:8000"
   migrations:
@@ -63,7 +63,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - .env_ci:/todolist/.env
+      - .:/todolist/
     command: >
       sh -c "python manage.py migrate"
 
