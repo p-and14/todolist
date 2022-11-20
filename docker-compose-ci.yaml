@@ -34,6 +34,8 @@ services:
       - .env
     environment:
       SECRET_KEY: $SECRET_KEY
+      DB_NAME: $DB_NAME
+      DB_PASSWORD: $DB_PASSWORD
     depends_on:
       postgres:
         condition: service_healthy
