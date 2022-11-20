@@ -14,7 +14,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - deploy/.env
     environment:
       POSTGRES_DB: $DB_NAME
       POSTGRES_USER: $DB_USER
@@ -28,36 +28,36 @@ services:
     ports:
       - "5432:5432"
   api:
-    image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     env_file:
-      - .env
-    environment:
-      SECRET_KEY: $SECRET_KEY
-      DB_NAME: $DB_NAME
-      DB_PASSWORD: $DB_PASSWORD
+      - deploy/.env
+#    environment:
+#      SECRET_KEY: $SECRET_KEY
+#      DB_NAME: $DB_NAME
+#      DB_PASSWORD: $DB_PASSWORD
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
     volumes:
-      - ./.env.ci:/todolist/.env
+      - ./.env_ci:/todolist/.env
     ports:
       - "8000:8000"
   migrations:
-    image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     env_file:
-      - .env
-    environment:
-      SECRET_KEY: $SECRET_KEY
-      DB_NAME: $DB_NAME
-      DB_PASSWORD: $DB_PASSWORD
+      - deploy/.env
+#    environment:
+#      SECRET_KEY: $SECRET_KEY
+#      DB_NAME: $DB_NAME
+#      DB_PASSWORD: $DB_PASSWORD
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - ./.env.ci:/todolist/.env
+      - ./.env_ci:/todolist/.env
     command: >
       sh -c "python manage.py migrate"
 
