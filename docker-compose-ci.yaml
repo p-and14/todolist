@@ -14,11 +14,11 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     env_file:
-      - deploy/.env
-    environment:
-      POSTGRES_DB: $DB_NAME
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASSWORD
+      - .env
+#    environment:
+#      POSTGRES_DB: $DB_NAME
+#      POSTGRES_USER: $DB_USER
+#      POSTGRES_PASSWORD: $DB_PASSWORD
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -31,7 +31,7 @@ services:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     env_file:
-      - deploy/.env
+      - .env
 #    environment:
 #      SECRET_KEY: $SECRET_KEY
 #      DB_NAME: $DB_NAME
@@ -48,7 +48,7 @@ services:
   migrations:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     env_file:
-      - deploy/.env
+      - .env
 #    environment:
 #      SECRET_KEY: $SECRET_KEY
 #      DB_NAME: $DB_NAME
