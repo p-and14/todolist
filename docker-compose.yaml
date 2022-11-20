@@ -45,6 +45,3 @@ services:
     volumes:
       - ./.env.release:/todolist/.env
     command: python manage.py migrate
-
-#volumes:
-#  postgres-data:

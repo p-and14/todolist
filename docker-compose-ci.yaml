@@ -36,14 +36,10 @@ services:
     ports:
       - "8000:8000"
   migrations:
-    build:
-      context: .
+    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./.env.release:/todolist/.env
     command: python manage.py migrate
-
-#volumes:
-#  postgres-data:
