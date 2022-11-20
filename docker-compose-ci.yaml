@@ -13,8 +13,6 @@ services:
     image: postgres:latest
     volumes:
       - ./pg_data:/var/lib/postgresql/data
-#    env_file:
-#      - .env
     environment:
       POSTGRES_DB: $DB_NAME
       POSTGRES_USER: $DB_USER
@@ -30,8 +28,6 @@ services:
   api:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
-#    env_file:
-#      - .env
     environment:
       SECRET_KEY: $SECRET_KEY
       DB_NAME: $DB_NAME
@@ -50,8 +46,6 @@ services:
       - "8000:8000"
   migrations:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
-#    env_file:
-#      - .env
     environment:
       SECRET_KEY: $SECRET_KEY
       DB_NAME: $DB_NAME

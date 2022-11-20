@@ -12,9 +12,7 @@ services:
   postgres:
     image: postgres:latest
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-#    env_file:
-#      - ./.env.release
+      - ./pg_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -31,8 +29,6 @@ services:
     build:
       context: .
     restart: always
-#    env_file:
-#      - ./.env.release
     environment:
       SECRET_KEY: ghj29772ru9IT872780th987T(&^*(^923hkthf3i4gtghGyrr87y0guoowhcvzx__395=45+f
       DB_NAME: postgres
@@ -52,8 +48,6 @@ services:
   migrations:
     build:
       context: .
-#    env_file:
-#      - ./.env.release
     environment:
       SECRET_KEY: ghj29772ru9IT872780th987T(&^*(^923hkthf3i4gtghGyrr87y0guoowhcvzx__395=45+f
       DB_NAME: postgres
