@@ -44,7 +44,7 @@ services:
   migrations:
     image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     env_file:
-      - ./.env
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
