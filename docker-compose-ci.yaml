@@ -14,7 +14,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     env_file:
-      - ./.env
+      - .env
     environment:
       POSTGRES_DB: $DB_NAME
       POSTGRES_USER: $DB_USER
@@ -31,7 +31,9 @@ services:
     image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     env_file:
-      - ./.env
+      - .env
+    environment:
+      SECRET_KEY: $SECRET_KEY
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +47,8 @@ services:
     image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     env_file:
       - .env
+    environment:
+      SECRET_KEY: $SECRET_KEY
     depends_on:
       postgres:
         condition: service_healthy
