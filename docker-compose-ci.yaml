@@ -25,7 +25,7 @@ services:
     ports:
       - "5432:5432"
   api:
-    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,7 +36,7 @@ services:
     ports:
       - "8000:8000"
   migrations:
-    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: pand14/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
