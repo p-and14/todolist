@@ -63,7 +63,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - .:/todolist/
+      - .env_ci:/todolist/.env
     command: >
       sh -c "python manage.py migrate"
 
