@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   frontend:
-    image: sermalenk/skypro-front:lesson-34
+    image: sermalenk/skypro-front:lesson-35
     restart: always
     ports:
       - "80:80"
@@ -30,6 +30,7 @@ services:
       context: .
     restart: always
     environment:
+      DEBUG: 0
       SECRET_KEY: ghj29772ru9IT872780th987T(&^*(^923hkthf3i4gtghGyrr87y0guoowhcvzx__395=45+f
       DB_NAME: postgres
       DB_USER: postgres

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   frontend:
-    image: sermalenk/skypro-front:lesson-34
+    image: sermalenk/skypro-front:lesson-35
     restart: always
     ports:
       - "80:80"
@@ -29,6 +29,7 @@ services:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     environment:
+      DEBUG: 0
       SECRET_KEY: $SECRET_KEY
       DB_NAME: $DB_NAME
       DB_USER: $DB_USER
