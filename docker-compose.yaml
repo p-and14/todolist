@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   frontend:
-    image: sermalenk/skypro-front:lesson-35
+    image: sermalenk/skypro-front:lesson-36
     restart: always
     ports:
       - "80:80"
@@ -15,10 +15,6 @@ services:
       - ./pg_data:/var/lib/postgresql/data
     env_file:
       - .env.release
-#    environment:
-#      POSTGRES_DB: postgres
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
       interval: 5s
@@ -33,14 +29,6 @@ services:
     restart: always
     env_file:
       - .env.release
-#    environment:
-#      DEBUG: 0
-#      SECRET_KEY: ghj29772ru9IT872780th987T(&^*(^923hkthf3i4gtghGyrr87y0guoowhcvzx__395=45+f
-#      DB_NAME: postgres
-#      DB_USER: postgres
-#      DB_PASSWORD: postgres
-#      DB_HOST: postgres
-#      DB_PORT: 5432
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,13 +43,6 @@ services:
       context: .
     env_file:
       - .env.release
-#    environment:
-#      SECRET_KEY: ghj29772ru9IT872780th987T(&^*(^923hkthf3i4gtghGyrr87y0guoowhcvzx__395=45+f
-#      DB_NAME: postgres
-#      DB_USER: postgres
-#      DB_PASSWORD: postgres
-#      DB_HOST: postgres
-#      DB_PORT: 5432
     depends_on:
       postgres:
         condition: service_healthy

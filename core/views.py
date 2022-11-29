@@ -6,12 +6,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.models import User
-from core.serializers import UserRegistrationSerializer, UserProfileSerializer, UserPasswordUpdateSerializer
+from core import serializers
 
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer
+    serializer_class = serializers.UserRegistrationSerializer
 
 
 class UserLogin(generics.GenericAPIView):
@@ -31,7 +31,7 @@ class UserLogin(generics.GenericAPIView):
 
 class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = serializers.UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -44,7 +44,7 @@ class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
 
 class UpdatePassword(generics.UpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserPasswordUpdateSerializer
+    serializer_class = serializers.UserPasswordUpdateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
