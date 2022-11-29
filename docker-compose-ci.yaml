@@ -13,10 +13,12 @@ services:
     image: postgres:latest
     volumes:
       - ./pg_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: $DB_NAME
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASSWORD
+    env_file:
+      - .env
+#    environment:
+#      POSTGRES_DB: $DB_NAME
+#      POSTGRES_USER: $DB_USER
+#      POSTGRES_PASSWORD: $DB_PASSWORD
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -28,37 +30,37 @@ services:
   api:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
-    environment:
-      DEBUG: 0
-      SECRET_KEY: $SECRET_KEY
-      DB_NAME: $DB_NAME
-      DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
-      DB_HOST: $DB_HOST
-      DB_PORT: $DB_PORT
+    env_file:
+      - .env
+#    environment:
+#      DEBUG: 0
+#      SECRET_KEY: $SECRET_KEY
+#      DB_NAME: $DB_NAME
+#      DB_USER: $DB_USER
+#      DB_PASSWORD: $DB_PASSWORD
+#      DB_HOST: $DB_HOST
+#      DB_PORT: $DB_PORT
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    volumes:
-      - .env_ci:/todolist/.env
     ports:
       - "8000:8000"
   migrations:
     image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
-    environment:
-      SECRET_KEY: $SECRET_KEY
-      DB_NAME: $DB_NAME
-      DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
-      DB_HOST: $DB_HOST
-      DB_PORT: $DB_PORT
+    env_file:
+      - .env
+#    environment:
+#      SECRET_KEY: $SECRET_KEY
+#      DB_NAME: $DB_NAME
+#      DB_USER: $DB_USER
+#      DB_PASSWORD: $DB_PASSWORD
+#      DB_HOST: $DB_HOST
+#      DB_PORT: $DB_PORT
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - .env:/todolist/.env
     command: >
       sh -c "python manage.py migrate"
 

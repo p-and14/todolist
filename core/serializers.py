@@ -5,30 +5,25 @@ from core.models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
     password = serializers.CharField(write_only=True, validators=[password_validation.validate_password])
-    password_repeat = serializers.CharField(write_only=True, required=False)
-    email = serializers.EmailField()
+    password_repeat = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
         fields = ["id", "username", "first_name", "last_name", "email", "password", "password_repeat"]
 
-    def is_valid(self, *, raise_exception=False):
-        self._password = self.initial_data.get("password", None)
-        self._password_repeat = self.initial_data.pop("password_repeat")
-        return super().is_valid(raise_exception=raise_exception)
-
     def validate(self, data):
-        if self._password != self._password_repeat:
+        password = data.get("password")
+        password_repeat = data.pop("password_repeat")
+        if password != password_repeat:
             raise serializers.ValidationError("Passwords don't match")
         return data
 
     def create(self, validated_data):
+        password = self.initial_data.get("password")
         user = User.objects.create(**validated_data)
 
-        user.set_password(self._password)
+        user.set_password(password)
         user.save()
         return user
 
