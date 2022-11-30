@@ -2,8 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, filters
 from rest_framework.pagination import LimitOffsetPagination
 
-from goals.filters import GoalDateFilter
-from goals.models import GoalCategory, Goal
+from goals.filters import GoalDateFilter, GoalCommentFilter
+from goals.models import GoalCategory, Goal, GoalComment
 from goals import serializers
 
 
@@ -67,7 +67,7 @@ class GoalListView(generics.ListAPIView):
     ]
     filterset_class = GoalDateFilter
     ordering_fields = ["priority", "due_date"]
-    ordering = ["title"]
+    ordering = ["priority", "due_date"]
     search_fields = ["title", "description"]
 
     def get_queryset(self):
@@ -86,3 +86,35 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
         instance.status = 4
         instance.save()
         return instance
+
+
+class GoalCommentCreateView(generics.CreateAPIView):
+    model = GoalComment
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.GoalCommentCreateSerializer
+
+
+class GoalCommentListView(generics.ListAPIView):
+    model = GoalComment
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.GoalCommentSerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = [
+        filters.OrderingFilter,
+        DjangoFilterBackend,
+    ]
+    filterset_class = GoalCommentFilter
+    ordering_fields = ["created", "updated", ]
+    ordering = ["created"]
+
+    def get_queryset(self):
+        return GoalComment.objects.filter(user=self.request.user)
+
+
+class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
+    model = GoalComment
+    serializer_class = serializers.GoalCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return GoalComment.objects.filter(user=self.request.user)
