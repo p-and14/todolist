@@ -3,8 +3,9 @@ from rest_framework import generics, permissions, filters
 from rest_framework.pagination import LimitOffsetPagination
 
 from goals.filters import GoalDateFilter, GoalCommentFilter
-from goals.models import GoalCategory, Goal, GoalComment
+from goals.models import GoalCategory, Goal, GoalComment, Board
 from goals import serializers
+from goals.serializers import BoardCreateSerializer
 
 
 class GoalCategoryCreateView(generics.CreateAPIView):
@@ -118,3 +119,9 @@ class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return GoalComment.objects.filter(user=self.request.user)
+
+
+class BoardCreateView(generics.CreateAPIView):
+    model = Board
+    serializer_class = BoardCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
