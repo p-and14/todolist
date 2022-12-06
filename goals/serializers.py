@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from core.serializers import UserProfileSerializer
 from goals.models import GoalCategory, Goal, GoalComment, Board, BoardParticipant
+
+User = get_user_model()
 
 
 class GoalCategoryCreateSerializer(serializers.ModelSerializer):
@@ -94,3 +97,52 @@ class BoardCreateSerializer(serializers.ModelSerializer):
             user=user, board=board, role=BoardParticipant.Role.owner
         )
         return board
+
+
+class BoardParticipantSerializer(serializers.ModelSerializer):
+    role = serializers.ChoiceField(
+        required=True,
+        choices=[BoardParticipant.Role.writer, BoardParticipant.Role.reader]
+    )
+    user = serializers.SlugRelatedField(
+        slug_field="username", queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = BoardParticipant
+        fields = "__all__"
+        read_only_fields = ("id", "created", "updated", "board")
+
+
+class BoardSerializer(serializers.ModelSerializer):
+    participants = BoardParticipantSerializer(many=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Board
+        fields = "__all__"
+        read_only_fields = ("id", "created", "updated")
+
+    def update(self, instance, validated_data):
+        participants = validated_data.pop("participants")
+        user = validated_data.get("user")
+        for participant in participants:
+            if user == participant.get("user"):
+                raise serializers.ValidationError(
+                    {"participants":
+                         [{"user": f"Can't change the role for the user {user.username}"}]
+                     })
+            try:
+                BoardParticipant.objects.filter(board=instance, user=participant.get("user")).update(
+                    role=participant.get("role", BoardParticipant.Role.reader)
+                )
+            except:
+                BoardParticipant.objects.create(
+                    board=instance,
+                    **participant
+                )
+
+        if validated_data.get("title"):
+            setattr(instance, "title", validated_data["title"])
+        instance.save()
+        return instance
