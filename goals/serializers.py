@@ -105,7 +105,7 @@ class BoardParticipantSerializer(serializers.ModelSerializer):
         choices=[BoardParticipant.Role.writer, BoardParticipant.Role.reader]
     )
     user = serializers.SlugRelatedField(
-        slug_field="username", queryset=User.objects.all()
+        slug_field="username", queryset=User.objects.all(), required=True
     )
 
     class Meta:
@@ -115,7 +115,7 @@ class BoardParticipantSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    participants = BoardParticipantSerializer(many=True)
+    participants = BoardParticipantSerializer(many=True, required=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
@@ -124,25 +124,34 @@ class BoardSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated")
 
     def update(self, instance, validated_data):
-        participants = validated_data.pop("participants")
-        user = validated_data.get("user")
-        for participant in participants:
-            if user == participant.get("user"):
+        owner = validated_data.pop("user")
+        new_participants = validated_data.pop("participants")
+        new_with_user_id = {participant["user"].id: participant for participant in new_participants}
+        old_participants = instance.participants.exclude(user=owner)
+
+        for old_participant in old_participants:
+            if old_participant.user_id not in new_with_user_id:
+                old_participant.delete()
+            else:
+                old_participant.role = new_with_user_id.pop(old_participant.user_id)["role"]
+                old_participant.save()
+
+        for new_participant in new_with_user_id.values():
+            if owner == new_participant.get("user"):
                 raise serializers.ValidationError(
                     {"participants":
-                         [{"user": f"Can't change the role for the user {user.username}"}]
-                     })
-            try:
-                BoardParticipant.objects.filter(board=instance, user=participant.get("user")).update(
-                    role=participant.get("role", BoardParticipant.Role.reader)
-                )
-            except:
-                BoardParticipant.objects.create(
-                    board=instance,
-                    **participant
-                )
+                         {"user": f"Can't change the role for the user {owner.username}"}})
+            BoardParticipant.objects.create(
+                board=instance,
+                **new_participant)
 
         if validated_data.get("title"):
             setattr(instance, "title", validated_data["title"])
         instance.save()
         return instance
+
+
+class BoardListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Board
+        fields = "__all__"
