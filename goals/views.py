@@ -1,45 +1,50 @@
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, filters
+from rest_framework import generics, filters
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
-from goals.filters import GoalDateFilter, GoalCommentFilter
+from goals.filters import GoalDateFilter, GoalCommentFilter, GoalCategoryFilter
 from goals.models import GoalCategory, Goal, GoalComment, Board
 from goals import serializers
-from goals.permissions import BoardPermissions
+from goals import permissions
 from goals.serializers import BoardCreateSerializer
 
 
 class GoalCategoryCreateView(generics.CreateAPIView):
     model = GoalCategory
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalCategoryCreatePermissions]
     serializer_class = serializers.GoalCategoryCreateSerializer
 
 
 class GoalCategoryListView(generics.ListAPIView):
     model = GoalCategory
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.GoalCategorySerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
         filters.OrderingFilter,
         filters.SearchFilter,
+        DjangoFilterBackend,
     ]
+    filterset_class = GoalCategoryFilter
     ordering_fields = ["title", "created"]
     ordering = ["title"]
     search_fields = ["title"]
 
     def get_queryset(self):
-        return GoalCategory.objects.filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.filter(
+            board__participants__user=self.request.user, is_deleted=False)
 
 
 class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
     model = GoalCategory
     serializer_class = serializers.GoalCategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalCategoryPermissions]
 
     def get_queryset(self):
-        return GoalCategory.objects.filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.filter(
+            board__participants__user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
         goals = Goal.objects.filter(user=self.request.user, category_id=instance.id)
@@ -54,13 +59,13 @@ class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
 
 class GoalCreateView(generics.CreateAPIView):
     model = Goal
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalCreatePermissions]
     serializer_class = serializers.GoalCreateSerializer
 
 
 class GoalListView(generics.ListAPIView):
     model = Goal
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.GoalSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
@@ -74,16 +79,18 @@ class GoalListView(generics.ListAPIView):
     search_fields = ["title", "description"]
 
     def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
+        return Goal.objects.filter(
+            category__board__participants__user=self.request.user)
 
 
 class GoalView(generics.RetrieveUpdateDestroyAPIView):
     model = Goal
     serializer_class = serializers.GoalSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalPermissions]
 
     def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
+        return Goal.objects.filter(
+            category__board__participants__user=self.request.user)
 
     def perform_destroy(self, instance):
         instance.status = 4
@@ -93,13 +100,13 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
 
 class GoalCommentCreateView(generics.CreateAPIView):
     model = GoalComment
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalCommentCreatePermissions]
     serializer_class = serializers.GoalCommentCreateSerializer
 
 
 class GoalCommentListView(generics.ListAPIView):
     model = GoalComment
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.GoalCommentSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
@@ -111,27 +118,29 @@ class GoalCommentListView(generics.ListAPIView):
     ordering = ["created"]
 
     def get_queryset(self):
-        return GoalComment.objects.filter(user=self.request.user)
+        return GoalComment.objects.filter(
+            goal__category__board__participants__user=self.request.user)
 
 
 class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
     model = GoalComment
     serializer_class = serializers.GoalCommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, permissions.GoalCommentPermissions]
 
     def get_queryset(self):
-        return GoalComment.objects.filter(user=self.request.user)
+        return GoalComment.objects.filter(
+            goal__category__board__participants__user=self.request.user)
 
 
 class BoardCreateView(generics.CreateAPIView):
     model = Board
     serializer_class = BoardCreateSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class BoardView(generics.RetrieveUpdateDestroyAPIView):
     model = Board
-    permission_classes = [permissions.IsAuthenticated, BoardPermissions]
+    permission_classes = [IsAuthenticated, permissions.BoardPermissions]
     serializer_class = serializers.BoardSerializer
 
     def get_queryset(self):
@@ -150,7 +159,7 @@ class BoardView(generics.RetrieveUpdateDestroyAPIView):
 
 class BoardListView(generics.ListAPIView):
     model = Board
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.BoardListSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
