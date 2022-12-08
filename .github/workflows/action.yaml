@@ -31,4 +31,9 @@ jobs:
     steps:
       - name: clone code
         uses: actions/checkout@v2
+      - name: render configs
+        run: |
+          mkdir deploy
+          cat docker-compose-ci.yaml | envsubst > deploy/docker-compose.yaml
+          cat .env_ci | envsubst > deploy/.env
  
