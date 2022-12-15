@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # My apps
     'core',
     'goals',
+    'bot',
 
     # Other apps
     'corsheaders',

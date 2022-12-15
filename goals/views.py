@@ -47,10 +47,7 @@ class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
             board__participants__user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
-        goals = Goal.objects.filter(user=self.request.user, category_id=instance.id)
-        for goal in goals:
-            goal.status = 4
-            goal.save()
+        Goal.objects.filter(user=self.request.user, category=instance).update(status=Goal.Status.archived)
 
         instance.is_deleted = True
         instance.save()
@@ -115,7 +112,7 @@ class GoalCommentListView(generics.ListAPIView):
     ]
     filterset_class = GoalCommentFilter
     ordering_fields = ["created", "updated", ]
-    ordering = ["created"]
+    ordering = ["-created"]
 
     def get_queryset(self):
         return GoalComment.objects.filter(
@@ -140,11 +137,13 @@ class BoardCreateView(generics.CreateAPIView):
 
 class BoardView(generics.RetrieveUpdateDestroyAPIView):
     model = Board
-    permission_classes = [IsAuthenticated, permissions.BoardPermissions]
+    permission_classes = [permissions.BoardPermissions]
     serializer_class = serializers.BoardSerializer
 
     def get_queryset(self):
-        return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
+        return Board.objects.prefetch_related("participants").filter(
+            participants__user=self.request.user, is_deleted=False
+        )
 
     def perform_destroy(self, instance: Board):
         with transaction.atomic():
@@ -169,4 +168,6 @@ class BoardListView(generics.ListAPIView):
     ordering = ["title"]
 
     def get_queryset(self):
-        return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
+        return Board.objects.prefetch_related("participants").filter(
+            participants__user=self.request.user, is_deleted=False
+        )

@@ -28,7 +28,7 @@ class BoardCreateSerializer(serializers.ModelSerializer):
 class BoardParticipantSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(
         required=True,
-        choices=[BoardParticipant.Role.writer, BoardParticipant.Role.reader]
+        choices=BoardParticipant.Role.choices[1:]
     )
     user = serializers.SlugRelatedField(
         slug_field="username", queryset=User.objects.all(), required=True
@@ -72,9 +72,9 @@ class BoardSerializer(serializers.ModelSerializer):
                     board=instance,
                     **new_participant)
 
-        if validated_data.get("title"):
-            setattr(instance, "title", validated_data["title"])
-        instance.save()
+        if title := validated_data.get("title"):
+            instance.title = title
+            instance.save()
         return instance
 
 
@@ -100,9 +100,7 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
 
 class GoalCategorySerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
-    board = serializers.SlugRelatedField(
-        slug_field="id",
-        read_only=True)
+    board = BoardSerializer()
 
     class Meta:
         model = GoalCategory
@@ -112,6 +110,7 @@ class GoalCategorySerializer(serializers.ModelSerializer):
 
 class GoalCreateSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    description = serializers.CharField(allow_blank=True, required=False, allow_null=True)
 
     class Meta:
         model = Goal
