@@ -1,6 +1,18 @@
 version: "3.9"
 
 services:
+  bot:
+    image: $DOCKERHUB_USERNAME/todolist:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    command: >
+      sh -c "python manage.py runbot"
   frontend:
     image: sermalenk/skypro-front:lesson-38
     restart: always
