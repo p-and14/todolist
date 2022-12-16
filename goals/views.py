@@ -77,7 +77,7 @@ class GoalListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Goal.objects.filter(
-            category__board__participants__user=self.request.user)
+            category__board__participants__user=self.request.user, status__in=Goal.Status.values[:3])
 
 
 class GoalView(generics.RetrieveUpdateDestroyAPIView):
@@ -87,7 +87,7 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Goal.objects.filter(
-            category__board__participants__user=self.request.user)
+            category__board__participants__user=self.request.user, status__in=Goal.Status.values[:3])
 
     def perform_destroy(self, instance):
         instance.status = 4

@@ -55,6 +55,8 @@ class UpdateObj:
 class GetUpdatesResponse:
     ok: bool
     result: List[Optional[UpdateObj]]
+    error_code: Optional[int]
+    description: Optional[str]
 
     class Meta:
         unknown = marshmallow.EXCLUDE

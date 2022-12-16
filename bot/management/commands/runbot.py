@@ -24,7 +24,6 @@ while True:
 
         telegram_chat_id = item.message.chat.id
         telegram_user_id = item.message.from_.id
-        verification_code = generate_verification_code()
         tg_user = TgUser.objects.filter(telegram_user_id=telegram_user_id).first()
 
         if not tg_user:
@@ -42,6 +41,7 @@ while True:
             )
 
         if not tg_user.user_id:
+            verification_code = generate_verification_code()
             welcome_text = f"Для начала, подтвердите, пожалуйста, свой аккаунт. " \
                            f"Для подтверждения необходимо ввести код: " \
                            f"{verification_code} на сайте"
@@ -60,7 +60,11 @@ while True:
             categories = [category.title for category in categories.all()]
             message_text = item.message.text
 
-            if tg_user.command == "create":
+            if message_text == "/cancel":
+                tg_user.command = None
+                tg_user.save()
+                tg_client.send_message(chat_id=telegram_chat_id, text="Отмена. Введите новую команду")
+            elif tg_user.command == "create":
                 if message_text in categories:
                     tg_client.send_message(chat_id=telegram_chat_id, text="Введите название цели")
                     tg_user.command = message_text
@@ -77,11 +81,11 @@ while True:
                 )
                 tg_user.command = None
                 tg_user.save()
-                tg_client.send_message(chat_id=telegram_chat_id, text="Цель создана")
+                tg_client.send_message(chat_id=telegram_chat_id, text=f'Цель "{goal.title}" создана')
 
             elif message_text == "/goals":
                 goals = Goal.objects.filter(
-                    category__board__participants__user=tg_user.user_id)
+                    category__board__participants__user=tg_user.user_id, status__in=Goal.Status.values[:3])
                 text = "\n".join([goal.title for goal in goals.all()])
                 if not text:
                     text = "Целей не найдено"
@@ -91,7 +95,8 @@ while True:
                 text = ("Выберите категорию:\n" +
                         "\n".join(categories))
                 if not categories:
-                    text = "Категорий не найдено"
+                    tg_client.send_message(chat_id=telegram_chat_id, text="Категорий не найдено")
+                    continue
 
                 tg_client.send_message(chat_id=telegram_chat_id, text=text)
                 tg_user.command = "create"
