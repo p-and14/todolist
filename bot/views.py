@@ -28,7 +28,7 @@ class BotVerifyView(generics.GenericAPIView):
         if telegram_user := TgUser.objects.filter(
                 verification_code=verification_code
         ).first():
-            telegram_user.user_id = user
+            telegram_user.user = user
             telegram_user.save()
 
             text = "Верификация успешна пройдена. " \

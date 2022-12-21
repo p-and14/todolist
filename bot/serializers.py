@@ -7,7 +7,12 @@ class TgUserSerializer(serializers.ModelSerializer):
     username = serializers.SlugRelatedField(
         read_only=True,
         slug_field="username",
-        source="user_id"
+        source="user"
+    )
+    user_id = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field="id",
+        source="user"
     )
 
     class Meta:

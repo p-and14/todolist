@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 import marshmallow
-import marshmallow_dataclass
 
 
 @dataclass
@@ -10,6 +9,9 @@ class Entities:
     offset: int
     length: int
     type: str
+
+    class Meta:
+        unknown = marshmallow.EXCLUDE
 
 
 @dataclass
@@ -19,14 +21,20 @@ class Chat:
     username: str
     type: str
 
+    class Meta:
+        unknown = marshmallow.EXCLUDE
+
 
 @dataclass
 class MessageFrom:
     id: int
     is_bot: bool
-    first_name: str
+    first_name: Optional[str]
+    last_name: Optional[str]
     username: str
-    language_code: Optional[str]
+
+    class Meta:
+        unknown = marshmallow.EXCLUDE
 
 
 @dataclass
@@ -45,7 +53,7 @@ class Message:
 @dataclass
 class UpdateObj:
     update_id: int
-    message: Message
+    message: Optional[Message]
 
     class Meta:
         unknown = marshmallow.EXCLUDE
@@ -55,8 +63,6 @@ class UpdateObj:
 class GetUpdatesResponse:
     ok: bool
     result: List[Optional[UpdateObj]]
-    error_code: Optional[int]
-    description: Optional[str]
 
     class Meta:
         unknown = marshmallow.EXCLUDE

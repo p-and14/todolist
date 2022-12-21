@@ -21,6 +21,8 @@ while True:
 
     for item in res.result:
         offset = item.update_id + 1
+        if not item.message:
+            continue
 
         telegram_chat_id = item.message.chat.id
         telegram_user_id = item.message.from_.id
@@ -40,8 +42,8 @@ while True:
                 telegram_user_id=telegram_user_id,
             )
 
-        if not tg_user.user_id:
-            verification_code = generate_verification_code()
+        if not tg_user.user:
+            verification_code = generate_verification_code(10)
             welcome_text = f"Для начала, подтвердите, пожалуйста, свой аккаунт. " \
                            f"Для подтверждения необходимо ввести код: " \
                            f"{verification_code} на сайте"
@@ -77,7 +79,7 @@ while True:
                 goal = Goal.objects.create(
                     title=item.message.text,
                     category=category,
-                    user=tg_user.user_id
+                    user=tg_user.user,
                 )
                 tg_user.command = None
                 tg_user.save()
@@ -85,7 +87,7 @@ while True:
 
             elif message_text == "/goals":
                 goals = Goal.objects.filter(
-                    category__board__participants__user=tg_user.user_id, status__in=Goal.Status.values[:3])
+                    category__board__participants__user=tg_user.user, status__in=Goal.Status.values[:3])
                 text = "\n".join([goal.title for goal in goals.all()])
                 if not text:
                     text = "Целей не найдено"

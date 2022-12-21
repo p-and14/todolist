@@ -5,13 +5,15 @@ import requests
 
 from bot.tg.dc import GetUpdatesResponse, SendMessageResponse
 
-
 GetUpdateSchema = marshmallow_dataclass.class_schema(GetUpdatesResponse)
 SendMessageSchema = marshmallow_dataclass.class_schema(SendMessageResponse)
 
 
 class TgClient:
-    def __init__(self, token):
+    """
+    Telegram client for get_updates and send_message
+    """
+    def __init__(self, token: str):
         self.token = token
 
     def get_url(self, method: str):
