@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from core.serializers import UserProfileSerializer
 from goals.models import GoalCategory, Goal, GoalComment, Board, BoardParticipant
@@ -50,7 +51,10 @@ class BoardSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated")
 
     def update(self, instance, validated_data):
-        owner = validated_data.pop("user")
+        owner = instance.participants.filter(
+            board=instance,
+            role=BoardParticipant.Role.owner
+        ).first().user
         new_participants = validated_data.pop("participants")
         new_with_user_id = {participant["user"].id: participant for participant in new_participants}
         old_participants = instance.participants.exclude(user=owner)
@@ -82,6 +86,7 @@ class BoardListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = "__all__"
+        ordering = ("title",)
 
 
 class GoalCategoryCreateSerializer(serializers.ModelSerializer):
@@ -89,7 +94,7 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
     board = serializers.SlugRelatedField(
         slug_field="id",
         queryset=Board.objects.all(),
-        required=True
+        required=True,
     )
 
     class Meta:
@@ -97,10 +102,15 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated", "user")
         fields = "__all__"
 
+    def create(self, validated_data):
+        if not validated_data["board"]:
+            raise ValidationError("board field must be not null")
+        return super().create(validated_data)
+
 
 class GoalCategorySerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
-    board = BoardSerializer()
+    board = BoardSerializer(read_only=True)
 
     class Meta:
         model = GoalCategory

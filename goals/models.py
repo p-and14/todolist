@@ -22,6 +22,7 @@ class Board(DatesModelMixin):
     class Meta:
         verbose_name = "Доска"
         verbose_name_plural = "Доски"
+        ordering = ("title", )
 
     def __str__(self):
         return self.title

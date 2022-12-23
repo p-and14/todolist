@@ -28,8 +28,8 @@ class GoalCategoryListView(generics.ListAPIView):
         DjangoFilterBackend,
     ]
     filterset_class = GoalCategoryFilter
-    ordering_fields = ["title", "created"]
-    ordering = ["title"]
+    ordering_fields = ["title", "created", "id"]
+    ordering = ["title", "id"]
     search_fields = ["title"]
 
     def get_queryset(self):
@@ -71,8 +71,8 @@ class GoalListView(generics.ListAPIView):
         DjangoFilterBackend,
     ]
     filterset_class = GoalDateFilter
-    ordering_fields = ["priority", "due_date"]
-    ordering = ["priority", "due_date"]
+    ordering_fields = ["priority", "due_date", "id"]
+    ordering = ["priority", "due_date", "id"]
     search_fields = ["title", "description"]
 
     def get_queryset(self):
@@ -164,7 +164,7 @@ class BoardListView(generics.ListAPIView):
     filter_backends = [
         filters.OrderingFilter,
     ]
-    ordering_fields = ["title", ]
+    ordering_fields = ["title", "id"]
     ordering = ["title"]
 
     def get_queryset(self):

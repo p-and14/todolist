@@ -33,7 +33,7 @@ class GoalCategoryCreatePermissions(permissions.BasePermission):
             return False
         return BoardParticipant.objects.filter(
             user=request.user,
-            board=request.data["board"],
+            board=request.data.get("board"),
             role__in=(BoardParticipant.Role.owner, BoardParticipant.Role.writer)
         ).exists()
 
@@ -59,7 +59,7 @@ class GoalCreatePermissions(permissions.BasePermission):
             return False
         return BoardParticipant.objects.filter(
             user=request.user,
-            board__categories__exact=request.data["category"],
+            board__categories__exact=request.data.get("category"),
             role__in=(BoardParticipant.Role.owner, BoardParticipant.Role.writer)
         ).exists()
 
@@ -85,6 +85,6 @@ class GoalCommentCreatePermissions(permissions.BasePermission):
             return False
         return BoardParticipant.objects.filter(
             user=request.user,
-            board__categories__goals__exact=request.data["goal"],
+            board__categories__goals__exact=request.data.get("goal"),
             role__in=(BoardParticipant.Role.owner, BoardParticipant.Role.writer)
         ).exists()
